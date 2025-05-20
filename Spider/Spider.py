@@ -8,12 +8,13 @@ from urllib.parse import urljoin
 from colorama import Fore,Style
 
 def banner():
-        print(Fore.RED + Style.BRIGHT + """
-                 ▄▄▄ ▄▄▄▄  ▄    ▐▌▗▞▀▚▖ ▄▄▄ 
-                ▀▄▄  █   █ ▄    ▐▌▐▛▀▀▘█    
-                ▄▄▄▀ █▄▄▄▀ █ ▗▞▀▜▌▝▚▄▄▖█    
-                     █     █ ▝▚▄▟▌          
-                     ▀                      
+        print(Fore.RED + Style.BRIGHT + r"""
+               .__    .___            
+  ____________ |__| __| _/___________ 
+ /  ___/\____ \|  |/ __ |/ __ \_  __ \
+ \___ \ |  |_> >  / /_/ \  ___/|  | \/
+/____  >|   __/|__\____ |\___  >__|   
+     \/ |__|           \/    \/       
 """ + Style.RESET_ALL)
         
 def log_error(message):
