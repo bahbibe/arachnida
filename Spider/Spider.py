@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-
-
 import os
 import argparse
 import requests
@@ -10,12 +8,12 @@ from urllib.parse import urljoin
 from colorama import Fore,Style
 
 def banner():
-        print(Fore.RED + Style.DIM + """
-                                 ▄▄▄ ▄▄▄▄  ▄    ▐▌▗▞▀▚▖ ▄▄▄ 
-                                ▀▄▄  █   █ ▄    ▐▌▐▛▀▀▘█    
-                                ▄▄▄▀ █▄▄▄▀ █ ▗▞▀▜▌▝▚▄▄▖█    
-                                     █     █ ▝▚▄▟▌          
-                                     ▀                      
+        print(Fore.RED + Style.BRIGHT + """
+                 ▄▄▄ ▄▄▄▄  ▄    ▐▌▗▞▀▚▖ ▄▄▄ 
+                ▀▄▄  █   █ ▄    ▐▌▐▛▀▀▘█    
+                ▄▄▄▀ █▄▄▄▀ █ ▗▞▀▜▌▝▚▄▄▖█    
+                     █     █ ▝▚▄▟▌          
+                     ▀                      
 """ + Style.RESET_ALL)
         
 def log_error(message):
@@ -27,9 +25,6 @@ def log_warning(message):
 def log_success(message):
     print(Fore.BLUE + message + Style.RESET_ALL)
 
-
-
-
 def parse_args():
     parser = argparse.ArgumentParser(prog="./Spider", description="Spider allows you to scrape images from a website.")
     parser.add_argument("-r", "--recursive", action="store_true", help="Recursively scrape images")
@@ -38,8 +33,18 @@ def parse_args():
     parser.add_argument("url", help="URL to scrape images from")
     return parser.parse_args()
 
+def save_image(filename, img_data):
+    try:
+        with open(filename, 'wb') as f:
+            for chunk in img_data.iter_content(1024):
+                f.write(chunk)
+        log_success(f"Downloaded {filename}")
+    except Exception as e:
+        log_error(f"Error saving image {filename}: {e}")
+        exit(1)
+    
+
 def collect_links(url, level):
-    print(f"Collecting links from {url} at level {level}")
     if level == 0:
         return []
     try:
@@ -57,21 +62,24 @@ def collect_links(url, level):
         return []
     
 def download_images(links, path):
-    if not os.path.exists(path):
-        os.makedirs(path)
-    for link in links:
-        try:
+    try:
+        for link in links:
             response = requests.get(link)
-            if response.status_code == 200:
-                filename = os.path.join(path, os.path.basename(link))
-                with open(filename, 'wb') as f:
-                    f.write(response.content)
-                log_info(f"Downloaded: {filename}")
-            else:
-                log_error(f"Failed to download {link}: {response.status_code}")
-        except requests.RequestException as e:
-            log_error(f"Error downloading {link}: {e}")
-
+            soup = BeautifulSoup(response.text, 'html.parser')
+            images = soup.find_all('img')
+            for img in images:
+                if 'src' not in img.attrs:
+                    continue
+                img_url = urljoin(link, img['src'])
+                if validators.url(img_url):
+                    basename = os.path.basename(img_url).split("?")[0]
+                    if not os.path.splitext(basename)[1].lower() in ('.jpg', '.jpeg', '.png', '.gif', '.bmp'):
+                        continue
+                    filename = os.path.join(path, basename)
+                    save_image(filename, requests.get(img_url, stream=True))
+    except requests.RequestException as e:
+        log_error(f"Error fetching images from {link}: {e}")
+        exit(1)
 
 if __name__ == "__main__":
     banner()
@@ -84,27 +92,13 @@ if __name__ == "__main__":
         if args.recursive and args.level < 0:
             raise ValueError("Recursion level must be non-negative")
         if args.recursive:
-            print(args.level)
             links = collect_links(args.url, args.level)
-            log_info(f"Found {len(links)} links.")
-            # download_images(links, args.path)
-        # else:
-        #     response = requests.get(args.url)
-        #     soup = BeautifulSoup(response.text, 'html.parser')
-        #     images = [img['src'] for img in soup.find_all('img', src=True)]
-        #     log_info(f"Found {len(images)} images.")
-            # download_images(images, args.path)
-            
+            download_images(links, args.path)
+        else:
+            download_images([args.url], args.path)
     except Exception as e:
         log_error(f"Error: {e}")
         exit(1)
-    # except KeyboardInterrupt:
-    #     log_error("\nProcess interrupted by user.")
-    #     exit(1)
-    # except SystemExit:
-    #     log_error("\nExiting...")
-    #     exit(1)
-    # except:
-    #     log_error("\nAn unexpected error occurred.")
-    #     exit(1)
-
+    except KeyboardInterrupt:
+        log_warning("Process interrupted by user.")
+        exit(0)
