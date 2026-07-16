@@ -53,6 +53,15 @@ python Spider/Spider.py -r -l 3 <URL>
 # Specify output directory
 python Spider/Spider.py -p ./my_images/ <URL>
 
+# Download all file extensions (not just defaults)
+python Spider/Spider.py --all <URL>
+
+# Download only specific extensions
+python Spider/Spider.py -e ".jpg,.png,.webp" <URL>
+
+# Show verbose progress output
+python Spider/Spider.py -v <URL>
+
 # Full options
 python Spider/Spider.py -r -l 3 -p ./data/ https://example.com
 ```
@@ -65,6 +74,9 @@ python Spider/Spider.py -r -l 3 -p ./data/ https://example.com
 | `-r, --recursive` | Enable recursive crawling |
 | `-l, --level` | Recursion depth (default: 5) |
 | `-p, --path` | Output directory (default: `./data/`) |
+| `--all` | Download all file extensions |
+| `-e, --extensions` | Comma-separated extensions (e.g. `.jpg,.png,.webp`) |
+| `-v, --verbose` | Show detailed progress output |
 
 ### Scorpion
 
@@ -74,9 +86,25 @@ python Scorpion/Scorpion.py image.jpg
 
 # Read metadata from multiple images
 python Scorpion/Scorpion.py image1.jpg image2.png image3.jpeg
+
+# Accept all file extensions
+python Scorpion/Scorpion.py --all image.webp image.tiff
+
+# Accept only specific extensions
+python Scorpion/Scorpion.py -e ".jpg,.png,.webp" image.jpg
 ```
 
-Supported formats: `.jpg`, `.jpeg`, `.png`, `.gif`, `.bmp`
+**Options:**
+
+| Flag | Description |
+|------|-------------|
+| `FILE` | Image file(s) to process (required) |
+| `--all` | Accept all file extensions |
+| `-e, --extensions` | Comma-separated extensions (e.g. `.jpg,.png,.webp`) |
+
+**Default supported formats:** `.jpg`, `.jpeg`, `.png`, `.gif`, `.bmp`
+
+**Output includes:** format, mode, size, filename, changed/modified/accessed timestamps, file size, and EXIF data (when available).
 
 ---
 
@@ -97,5 +125,7 @@ Supported formats: `.jpg`, `.jpeg`, `.png`, `.gif`, `.bmp`
 
 - All HTTP requests include a random user-agent header to avoid being blocked
 - Requests have a timeout of 3s (connect) and 10s (read) to prevent hanging
-- Only image files with valid extensions are downloaded
+- Only image files with valid extensions are downloaded by default (`.jpg`, `.jpeg`, `.png`, `.gif`, `.bmp`)
+- Use `--all` to download any file extension, or `-e` to specify custom ones
 - Images are saved with their original filenames (query params stripped)
+- Duplicate URLs and images are tracked to prevent redundant downloads
