@@ -68,8 +68,7 @@ if __name__ == "__main__":
         try:
             with Image.open(file) as image:
                 read_data(file, image)
-                if file.lower().endswith(('.jpg', '.jpeg')):
-                    read_exif(file, image)
+                read_exif(file, image)
             print(Fore.GREEN + f"[+] Successfully processed {file}" + Style.RESET_ALL)
         except Exception as e:
             print(Fore.RED + f"[-] Error opening {file}: {e}" + Style.RESET_ALL)

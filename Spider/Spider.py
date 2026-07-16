@@ -48,27 +48,30 @@ def save_image(filename, img_data):
         log_success(f"Downloaded {filename}")
     except Exception as e:
         log_error(f"Error saving image {filename}: {e}")
-        exit(1)
     
 
-def collect_links(url, level):
-    if level == 0:
+def collect_links(url, level, seen=None):
+    if seen is None:
+        seen = set()
+    if level == 0 or url in seen:
         return []
+    seen.add(url)
     try:
         response = requests.get(url, headers=random_headers(), timeout=(3, 10))
         soup = BeautifulSoup(response.text, 'html.parser')
         links = []
         for link in soup.find_all('a', href=True):
             full_url = urljoin(url, link['href'])
-            if validators.url(full_url):
+            if validators.url(full_url) and full_url not in seen:
                 links.append(full_url)
-                links.extend(collect_links(full_url, level - 1))
+                links.extend(collect_links(full_url, level - 1, seen))
         return links
     except requests.RequestException as e:
         log_error(f"Error fetching {url}: {e}")
         return []
     
 def download_images(links, path):
+    downloaded = set()
     try:
         for link in links:
             response = requests.get(link, headers=random_headers(), timeout=(3, 10))
@@ -78,15 +81,15 @@ def download_images(links, path):
                 if 'src' not in img.attrs:
                     continue
                 img_url = urljoin(link, img['src'])
-                if validators.url(img_url):
+                if validators.url(img_url) and img_url not in downloaded:
                     basename = os.path.basename(img_url).split("?")[0]
                     if not os.path.splitext(basename)[1].lower() in ('.jpg', '.jpeg', '.png', '.gif', '.bmp'):
                         continue
                     filename = os.path.join(path, basename)
                     save_image(filename, requests.get(img_url, headers=random_headers(), timeout=(3, 10), stream=True))
+                    downloaded.add(img_url)
     except requests.RequestException as e:
         log_error(f"Error fetching images from {link}: {e}")
-        exit(1)
 
 if __name__ == "__main__":
     banner()
