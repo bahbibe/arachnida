@@ -2,6 +2,7 @@ beautifulsoup4==4.13.4
 certifi==2025.4.26
 charset-normalizer==3.4.2
 colorama==0.4.6
+fake-useragent==2.2.0
 idna==3.10
 pillow==11.2.1
 requests==2.32.3

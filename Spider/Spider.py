@@ -3,9 +3,15 @@ import os
 import argparse
 import requests
 import validators
+from fake_useragent import UserAgent
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
 from colorama import Fore,Style
+
+ua = UserAgent()
+
+def random_headers():
+    return {"User-Agent": ua.random}
 
 def banner():
         print(Fore.RED + Style.BRIGHT + r"""
@@ -49,7 +55,7 @@ def collect_links(url, level):
     if level == 0:
         return []
     try:
-        response = requests.get(url)
+        response = requests.get(url, headers=random_headers(), timeout=(3, 10))
         soup = BeautifulSoup(response.text, 'html.parser')
         links = []
         for link in soup.find_all('a', href=True):
@@ -65,7 +71,7 @@ def collect_links(url, level):
 def download_images(links, path):
     try:
         for link in links:
-            response = requests.get(link)
+            response = requests.get(link, headers=random_headers(), timeout=(3, 10))
             soup = BeautifulSoup(response.text, 'html.parser')
             images = soup.find_all('img')
             for img in images:
@@ -77,7 +83,7 @@ def download_images(links, path):
                     if not os.path.splitext(basename)[1].lower() in ('.jpg', '.jpeg', '.png', '.gif', '.bmp'):
                         continue
                     filename = os.path.join(path, basename)
-                    save_image(filename, requests.get(img_url, stream=True))
+                    save_image(filename, requests.get(img_url, headers=random_headers(), timeout=(3, 10), stream=True))
     except requests.RequestException as e:
         log_error(f"Error fetching images from {link}: {e}")
         exit(1)
