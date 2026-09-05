@@ -8,7 +8,7 @@ A Python web image scraper and image metadata extractor.
 Scrapes images from a website with optional recursive crawling.
 
 ### Scorpion
-Extracts EXIF data and metadata from local image files.
+Extracts, modifies, and deletes EXIF data and metadata from local image files, including an interactive terminal UI.
 
 ---
 
@@ -112,7 +112,7 @@ python Scorpion/Scorpion.py -i image1.jpg image2.png
 
 | Flag | Description |
 |------|-------------|
-| `FILE` | Image file(s) to process (required) |
+| `FILE` | Image file(s) to process (required unless `-i` is used alone) |
 | `--all` | Accept all file extensions |
 | `-e, --extensions` | Comma-separated extensions (e.g. `.jpg,.png,.webp`) |
 | `-s, --set` | Set/modify an EXIF tag, `TAG=VALUE` (repeatable) |
@@ -120,7 +120,9 @@ python Scorpion/Scorpion.py -i image1.jpg image2.png
 | `--delete-all-exif` | Delete all EXIF tags from the file(s) |
 | `-i, --tui` | Launch an interactive terminal UI to view/manage metadata |
 
-**TUI controls:** arrow keys / `j`/`k` to move, `Enter` to open a file, `s` to set a tag, `d` to delete a tag, `x` to delete all EXIF, `b`/`Esc` to go back, `q` to quit.
+Running `-i` with no `FILE` browses image files in the current directory; with exactly one `FILE` it opens straight to that file's detail view.
+
+**TUI controls:** arrow keys / `j`/`k` to move, `Enter` to open a file, `s` to set a tag, `d` to delete a tag, `x` to delete all EXIF, `b`/`Esc` to go back (`Esc` also cancels a text prompt), `q` to quit.
 
 **Default supported formats:** `.jpg`, `.jpeg`, `.png`, `.gif`, `.bmp`
 
@@ -151,3 +153,9 @@ python Scorpion/Scorpion.py -i image1.jpg image2.png
 - Use `--all` to download any file extension, or `-e` to specify custom ones
 - Images are saved with their original filenames (query params stripped)
 - Duplicate URLs and duplicate output filenames are tracked to prevent redundant/overwriting downloads
+
+---
+
+## License
+
+MIT — see [LICENSE](LICENSE).
