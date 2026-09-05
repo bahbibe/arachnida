@@ -94,6 +94,18 @@ python Scorpion/Scorpion.py --all image.webp image.tiff
 
 # Accept only specific extensions
 python Scorpion/Scorpion.py -e ".jpg,.png,.webp" image.jpg
+
+# Set/modify an EXIF tag
+python Scorpion/Scorpion.py -s Artist=YourName image.jpg
+
+# Delete a specific EXIF tag
+python Scorpion/Scorpion.py -d GPSInfo image.jpg
+
+# Delete all EXIF tags
+python Scorpion/Scorpion.py --delete-all-exif image.jpg
+
+# Launch the interactive terminal UI to view/manage metadata
+python Scorpion/Scorpion.py -i image1.jpg image2.png
 ```
 
 **Options:**
@@ -103,6 +115,12 @@ python Scorpion/Scorpion.py -e ".jpg,.png,.webp" image.jpg
 | `FILE` | Image file(s) to process (required) |
 | `--all` | Accept all file extensions |
 | `-e, --extensions` | Comma-separated extensions (e.g. `.jpg,.png,.webp`) |
+| `-s, --set` | Set/modify an EXIF tag, `TAG=VALUE` (repeatable) |
+| `-d, --delete` | Delete an EXIF tag by name (repeatable) |
+| `--delete-all-exif` | Delete all EXIF tags from the file(s) |
+| `-i, --tui` | Launch an interactive terminal UI to view/manage metadata |
+
+**TUI controls:** arrow keys / `j`/`k` to move, `Enter` to open a file, `s` to set a tag, `d` to delete a tag, `x` to delete all EXIF, `b`/`Esc` to go back, `q` to quit.
 
 **Default supported formats:** `.jpg`, `.jpeg`, `.png`, `.gif`, `.bmp`
 
