@@ -78,6 +78,8 @@ python Spider/Spider.py -r -l 3 -p ./data/ https://example.com
 | `-e, --extensions` | Comma-separated extensions (e.g. `.jpg,.png,.webp`) |
 | `-v, --verbose` | Show detailed progress output |
 
+**Validation:** the target URL must be a valid URL, `--all` and `-e` cannot be used together, and `-l` must be a non-negative integer — invalid input prints an error and exits with a non-zero status.
+
 ### Scorpion
 
 ```bash
@@ -104,7 +106,9 @@ python Scorpion/Scorpion.py -e ".jpg,.png,.webp" image.jpg
 
 **Default supported formats:** `.jpg`, `.jpeg`, `.png`, `.gif`, `.bmp`
 
-**Output includes:** format, mode, size, filename, changed/modified/accessed timestamps, file size, and EXIF data (when available).
+**Output includes:** format, mode, size, filename, changed/modified/accessed timestamps, file size, EXIF data (when available), and a per-file success/error status line.
+
+**Validation:** `--all` and `-e` cannot be used together, and each file must exist and have a supported extension — invalid files are skipped with an error message rather than aborting the run.
 
 ---
 
@@ -128,4 +132,4 @@ python Scorpion/Scorpion.py -e ".jpg,.png,.webp" image.jpg
 - Only image files with valid extensions are downloaded by default (`.jpg`, `.jpeg`, `.png`, `.gif`, `.bmp`)
 - Use `--all` to download any file extension, or `-e` to specify custom ones
 - Images are saved with their original filenames (query params stripped)
-- Duplicate URLs and images are tracked to prevent redundant downloads
+- Duplicate URLs and duplicate output filenames are tracked to prevent redundant/overwriting downloads

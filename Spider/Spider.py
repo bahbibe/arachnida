@@ -26,11 +26,11 @@ def banner():
 def log_error(message):
     print(Fore.RED + message + Style.RESET_ALL)
 def log_info(message):
-    print(Fore.GREEN + message + Style.RESET_ALL)
+    print(Fore.CYAN + message + Style.RESET_ALL)
 def log_warning(message):
     print(Fore.YELLOW + message + Style.RESET_ALL)
 def log_success(message):
-    print(Fore.BLUE + message + Style.RESET_ALL)
+    print(Fore.GREEN + message + Style.RESET_ALL)
 def log_verbose(message, verbose):
     if verbose:
         log_info(message)
@@ -69,6 +69,7 @@ def collect_links(url, level, seen=None, verbose=False):
     try:
         log_verbose(f"Crawling {url} (level {level})", verbose)
         response = requests.get(url, headers=random_headers(), timeout=(3, 10))
+        response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
         links = []
         for link in soup.find_all('a', href=True):
@@ -82,30 +83,43 @@ def collect_links(url, level, seen=None, verbose=False):
         return []
     
 def download_images(links, path, extensions=DEFAULT_EXTENSIONS, verbose=False):
-    downloaded = set()
-    try:
-        for index, link in enumerate(links, start=1):
-            log_info(f"Processing page {index}/{len(links)}")
-            log_verbose(f"Page URL: {link}", verbose)
+    downloaded_urls = set()
+    downloaded_names = set()
+    for index, link in enumerate(links, start=1):
+        log_info(f"Processing page {index}/{len(links)}")
+        log_verbose(f"Page URL: {link}", verbose)
+        try:
             response = requests.get(link, headers=random_headers(), timeout=(3, 10))
-            soup = BeautifulSoup(response.text, 'html.parser')
-            images = soup.find_all('img')
-            log_verbose(f"Found {len(images)} image tag(s)", verbose)
-            for img in images:
-                if 'src' not in img.attrs:
-                    continue
-                img_url = urljoin(link, img['src'])
-                if validators.url(img_url) and img_url not in downloaded:
-                    basename = os.path.basename(img_url).split("?")[0]
-                    ext = os.path.splitext(basename)[1].lower()
-                    if extensions and ext not in extensions:
-                        continue
-                    filename = os.path.join(path, basename)
-                    if save_image(filename, requests.get(img_url, headers=random_headers(), timeout=(3, 10), stream=True)):
-                        downloaded.add(img_url)
-    except requests.RequestException as e:
-        log_error(f"Error fetching images from {link}: {e}")
-    return len(downloaded)
+            response.raise_for_status()
+        except requests.RequestException as e:
+            log_error(f"Error fetching {link}: {e}")
+            continue
+        soup = BeautifulSoup(response.text, 'html.parser')
+        images = soup.find_all('img')
+        log_verbose(f"Found {len(images)} image tag(s)", verbose)
+        for img in images:
+            if 'src' not in img.attrs:
+                continue
+            img_url = urljoin(link, img['src'])
+            if not validators.url(img_url) or img_url in downloaded_urls:
+                continue
+            basename = os.path.basename(img_url).split("?")[0]
+            if not basename or basename in ('.', '..') or basename in downloaded_names:
+                continue
+            ext = os.path.splitext(basename)[1].lower()
+            if extensions and ext not in extensions:
+                continue
+            filename = os.path.join(path, basename)
+            try:
+                img_response = requests.get(img_url, headers=random_headers(), timeout=(3, 10), stream=True)
+                img_response.raise_for_status()
+            except requests.RequestException as e:
+                log_error(f"Error fetching image {img_url}: {e}")
+                continue
+            if save_image(filename, img_response):
+                downloaded_urls.add(img_url)
+                downloaded_names.add(basename)
+    return len(downloaded_urls)
 
 if __name__ == "__main__":
     banner()
@@ -118,7 +132,7 @@ if __name__ == "__main__":
         if args.all:
             extensions = None
         elif args.extensions:
-            extensions = tuple(e.strip() if e.strip().startswith('.') else f'.{e.strip()}' for e in args.extensions.split(','))
+            extensions = tuple(e.strip().lower() if e.strip().startswith('.') else f'.{e.strip().lower()}' for e in args.extensions.split(','))
         else:
             extensions = DEFAULT_EXTENSIONS
         if not os.path.exists(args.path):
@@ -129,9 +143,10 @@ if __name__ == "__main__":
             log_info("Collecting links...")
             links = collect_links(args.url, args.level, verbose=args.verbose)
             log_info(f"Collected {len(links)} link(s)")
-            downloaded = download_images(links, args.path, extensions, args.verbose)
+            pages = [args.url] + links
         else:
-            downloaded = download_images([args.url], args.path, extensions, args.verbose)
+            pages = [args.url]
+        downloaded = download_images(pages, args.path, extensions, args.verbose)
         log_success(f"Finished. Downloaded {downloaded} image(s).")
     except Exception as e:
         log_error(f"Error: {e}")

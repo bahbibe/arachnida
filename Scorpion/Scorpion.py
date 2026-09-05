@@ -40,20 +40,20 @@ def read_exif(file, image):
 
 def read_data(file, image):
     try:
+        print(Fore.GREEN + f"[+] Metadata for {file}:" + Style.RESET_ALL)
+        print(f"{'Format':25}: {image.format}")
+        print(f"{'Mode':25}: {image.mode}")
+        print(f"{'Size':25}: {image.size}")
+        print(f"{'Filename':25}: {image.filename}")
+        print(f"{'Changed':25}: {time.ctime(os.path.getctime(file))}")
+        print(f"{'Modified':25}: {time.ctime(os.path.getmtime(file))}")
+        print(f"{'Accessed':25}: {time.ctime(os.path.getatime(file))}")
+        print(f"{'File Size':25}: {os.path.getsize(file)} bytes")
         if image.info:
-            print(Fore.GREEN + f"[+] Metadata for {file}:" + Style.RESET_ALL)
             for key, value in image.info.items():
                 print(f"{key:25}: {value}")
-            print(f"{'Format':25}: {image.format}")
-            print(f"{'Mode':25}: {image.mode}")
-            print(f"{'Size':25}: {image.size}")
-            print(f"{'Filename':25}: {image.filename}")
-            print(f"{'Changed':25}: {time.ctime(os.path.getctime(file))}")
-            print(f"{'Modified':25}: {time.ctime(os.path.getmtime(file))}")
-            print(f"{'Accessed':25}: {time.ctime(os.path.getatime(file))}")
-            print(f"{'File Size':25}: {os.path.getsize(file)} bytes")
         else:
-            print(Fore.YELLOW + f"[!] No metadata found in {file}" + Style.RESET_ALL)
+            print(Fore.YELLOW + f"[!] No extra metadata found in {file}" + Style.RESET_ALL)
     except Exception as e:
         print(Fore.RED + f"[-] Error reading metadata from {file}: {e}" + Style.RESET_ALL)
 
@@ -67,7 +67,7 @@ if __name__ == "__main__":
     if args.all:
         extensions = None
     elif args.extensions:
-        extensions = tuple(e.strip() if e.strip().startswith('.') else f'.{e.strip()}' for e in args.extensions.split(','))
+        extensions = tuple(e.strip().lower() if e.strip().startswith('.') else f'.{e.strip().lower()}' for e in args.extensions.split(','))
     else:
         extensions = DEFAULT_EXTENSIONS
     files = args.FILE
