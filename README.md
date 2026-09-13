@@ -13,6 +13,7 @@ Two small, dependency-light CLI tools: scrape images off a website, then read, e
 |---|---|
 | **Spider** crawling and downloading | ![Spider run](docs/screenshots/spider-run.png) |
 | **Scorpion** reading full metadata + EXIF | ![Scorpion metadata read](docs/screenshots/scorpion-run.png) |
+| **Scorpion TUI** — browse, open, set a tag, confirm | ![Scorpion TUI demo](docs/screenshots/scorpion-tui-demo.gif) |
 
 ## Quick start
 
