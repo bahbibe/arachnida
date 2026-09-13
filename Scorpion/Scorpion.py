@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import os
 import time
+import struct
 import curses
 import argparse
 from colorama import Fore, Style
@@ -44,7 +45,9 @@ def read_exif(file, image):
                 print(f"{tag:25}: {value}")
         else:
             print(Fore.YELLOW + f"[!] No EXIF data found in {file}" + Style.RESET_ALL)
-    except Exception as e:
+    except (OSError, SyntaxError, struct.error, KeyError, ValueError) as e:
+        # Malformed EXIF in an otherwise-valid image can surface as any of these,
+        # since it's Pillow unpacking arbitrary binary from an untrusted file.
         print(Fore.RED + f"[-] Error reading EXIF from {file}: {e}" + Style.RESET_ALL)
 
 def read_data(file, image):
@@ -63,7 +66,7 @@ def read_data(file, image):
                 print(f"{key:25}: {value}")
         else:
             print(Fore.YELLOW + f"[!] No extra metadata found in {file}" + Style.RESET_ALL)
-    except Exception as e:
+    except OSError as e:
         print(Fore.RED + f"[-] Error reading metadata from {file}: {e}" + Style.RESET_ALL)
 
 def resolve_tag_id(tag_name):
@@ -180,7 +183,7 @@ def _tui_detail(stdscr, file):
                 for tag_id, value in exif.items():
                     tag = ExifTags.TAGS.get(tag_id, tag_id)
                     exif_lines.append((str(tag), str(value)))
-        except Exception as e:
+        except (OSError, SyntaxError, struct.error, KeyError, ValueError) as e:
             info_lines.append(f"Error reading file: {e}")
 
         stdscr.clear()
@@ -219,7 +222,7 @@ def _tui_detail(stdscr, file):
                     set_exif_tag(exif, tag_name, value)
                     save_exif(file, image, exif)
                 _tui_message(stdscr, f"Set {tag_name}. Press any key.", C_SUCCESS)
-            except Exception as e:
+            except (OSError, ValueError) as e:
                 _tui_message(stdscr, f"Error: {e}. Press any key.", C_ERROR)
         elif key == ord('d'):
             tag_name = _tui_prompt(stdscr, "Tag name to delete: ")
@@ -232,7 +235,7 @@ def _tui_detail(stdscr, file):
                     delete_exif_tag(exif, tag_name)
                     save_exif(file, image, exif)
                 _tui_message(stdscr, f"Deleted {tag_name}. Press any key.", C_SUCCESS)
-            except Exception as e:
+            except (OSError, ValueError) as e:
                 _tui_message(stdscr, f"Error: {e}. Press any key.", C_ERROR)
         elif key == ord('x'):
             try:
@@ -243,7 +246,7 @@ def _tui_detail(stdscr, file):
                         del exif[tag_id]
                     save_exif(file, image, exif)
                 _tui_message(stdscr, "Deleted all EXIF tags. Press any key.", C_SUCCESS)
-            except Exception as e:
+            except (OSError, ValueError) as e:
                 _tui_message(stdscr, f"Error: {e}. Press any key.", C_ERROR)
 
 def _tui_main(stdscr, files):
@@ -322,7 +325,7 @@ if __name__ == "__main__":
         if edit_mode:
             try:
                 edit_file(file, args.set, args.delete, args.delete_all_exif)
-            except Exception as e:
+            except (OSError, ValueError) as e:
                 print(Fore.RED + f"[-] Error editing {file}: {e}" + Style.RESET_ALL)
             continue
         try:
@@ -330,5 +333,5 @@ if __name__ == "__main__":
                 read_data(file, image)
                 read_exif(file, image)
             print(Fore.GREEN + f"[+] Successfully processed {file}" + Style.RESET_ALL)
-        except Exception as e:
+        except OSError as e:
             print(Fore.RED + f"[-] Error opening {file}: {e}" + Style.RESET_ALL)

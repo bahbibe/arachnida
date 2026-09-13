@@ -55,7 +55,7 @@ def save_image(filename, img_data):
                 f.write(chunk)
         log_success(f"Downloaded {filename}")
         return True
-    except Exception as e:
+    except (OSError, requests.RequestException) as e:
         log_error(f"Error saving image {filename}: {e}")
         return False
     
@@ -148,7 +148,7 @@ if __name__ == "__main__":
             pages = [args.url]
         downloaded = download_images(pages, args.path, extensions, args.verbose)
         log_success(f"Finished. Downloaded {downloaded} image(s).")
-    except Exception as e:
+    except (ValueError, OSError) as e:
         log_error(f"Error: {e}")
         exit(1)
     except KeyboardInterrupt:
