@@ -2,10 +2,10 @@
 
 Two small, dependency-light CLI tools: scrape images off a website, then read, edit, or wipe what's hidden inside them.
 
+![CI](https://github.com/bahbibe/arachnida/actions/workflows/ci.yml/badge.svg)
 ![Python](https://img.shields.io/badge/python-3.12+-blue)
-![License](https://img.shields.io/badge/license-MIT-green)
-![Pillow](https://img.shields.io/badge/pillow-11.2-lightgrey)
-![Requests](https://img.shields.io/badge/requests-2.32-lightgrey)
+![License](https://img.shields.io/github/license/bahbibe/arachnida)
+![Last commit](https://img.shields.io/github/last-commit/bahbibe/arachnida)
 
 ## Screenshots
 
