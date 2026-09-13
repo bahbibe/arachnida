@@ -7,6 +7,15 @@ Two small, dependency-light CLI tools: scrape images off a website, then read, e
 ![Pillow](https://img.shields.io/badge/pillow-11.2-lightgrey)
 ![Requests](https://img.shields.io/badge/requests-2.32-lightgrey)
 
+## Screenshots
+
+| | |
+|---|---|
+| **Spider** crawling and downloading | ![Spider run](docs/screenshots/spider-run.png) |
+| **Scorpion** reading full metadata + EXIF | ![Scorpion metadata read](docs/screenshots/scorpion-run.png) |
+| **Scorpion TUI** — file browser | ![Scorpion TUI file list](docs/screenshots/scorpion-tui-list.png) |
+| **Scorpion TUI** — EXIF detail view | ![Scorpion TUI detail view](docs/screenshots/scorpion-tui-detail.png) |
+
 ## Quick start
 
 ```bash
