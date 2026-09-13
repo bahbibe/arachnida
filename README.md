@@ -13,8 +13,6 @@ Two small, dependency-light CLI tools: scrape images off a website, then read, e
 |---|---|
 | **Spider** crawling and downloading | ![Spider run](docs/screenshots/spider-run.png) |
 | **Scorpion** reading full metadata + EXIF | ![Scorpion metadata read](docs/screenshots/scorpion-run.png) |
-| **Scorpion TUI** — file browser | ![Scorpion TUI file list](docs/screenshots/scorpion-tui-list.png) |
-| **Scorpion TUI** — EXIF detail view | ![Scorpion TUI detail view](docs/screenshots/scorpion-tui-detail.png) |
 
 ## Quick start
 
@@ -28,6 +26,15 @@ pip install -r requirements.txt
 python Spider/Spider.py https://example.com
 python Scorpion/Scorpion.py data/some-image.jpg
 ```
+
+### Running tests
+
+```bash
+pip install -r requirements-dev.txt
+python -m pytest tests/ -v
+```
+
+Tests mock all network calls, so they run offline and don't touch a real website.
 
 ## How it works
 
